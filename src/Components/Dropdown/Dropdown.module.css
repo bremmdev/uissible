@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Source+Code+Pro:ital,wght@0,400;0,500;0,600;1,600&display=swap');
+
+.dropdown{
+  font-size:1rem;
+  font-family: 'Poppins', sans-serif;
+  text-align: left;
+  border-radius:0.25em;
+  max-width:400px;
+  margin:0 auto;
+}
+
+.dropdown ul{
+  list-style-type: none;
+  padding:0;
+  margin:0;
+  border-radius:0.25em;
+}
+
+.dropdown .btn,
+.dropdown li{
+  padding:1em;
+  border-radius:0.25em;
+}
+
+.dropdown li{
+  background:#f7f6fe;
+}
+
+.dropdown li:hover,
+.dropdown li:focus{
+  background:#e0d9fa;
+}
+
+.dropdown .btn{
+  background:#6243e6;
+  outline:none;
+  border:none;
+  margin:0;
+  font-size:inherit;
+  font-family: inherit;
+  width:100%;
+  text-align: left;
+  color:#fff;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown .btn-actions{
+  display:flex;
+  align-items:center;
+  justify-content: space-between; 
+  gap:0.5em;
+}
+
+.dropdown .clear-icon{
+  color: #e0d9fa;
+}
+
+.dropdown .clear-icon:hover{
+  color:#fff;
+  transform:scale(1.1);
+
+}
+
+.fade{
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+
+@keyframes fadeIn {
+  from {
+    color:transparent;
+  }
+
+  to {
+    color:#fff;
+  }
+}
+
+*:focus{
+  outline:2px solid yellow;
+}
