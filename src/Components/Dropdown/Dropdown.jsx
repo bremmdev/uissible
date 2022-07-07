@@ -1,25 +1,35 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
+import React from "react"
 import styles from "./Dropdown.module.css";
 import {
   IoIosArrowDropdown,
   IoIosArrowDropup,
   IoMdClose,
 } from "react-icons/io";
+import PropTypes from 'prop-types'
 
 const formatText = (x) => `${x.charAt(0).toUpperCase()}${x.slice(1)}`
 
 const Dropdown = (props) => {
-  const [showOptions, setShowOptions] = useState(false);
-  const [selectedOption, setSelectedOption] = useState(null);
+
+  const { value, placeholder, onChange, id, autoFocus, label, clearable } = props;
+ 
+  //format and sort options
+  const options = props.options.map((v) => v.trim().toLowerCase()).sort()
+
+  //state
+  const [showOptions, setShowOptions] = useState(null)
+  const [selectedOption, setSelectedOption] = useState(() => {
+    if(!value){
+      return null
+    }
+    const existingIdx = options.findIndex((option) => option === value.trim().toLowerCase());
+    return existingIdx !== -1 ? existingIdx : null;
+  });
 
   const prevSelectedOptionRef = useRef(null);
   const dropDownRef = useRef(null)
  
-  const { value, placeholder, onChange, id, autoFocus, label, clearable } = props;
-
-  //format and sort options and memoize the result
-  const options = useMemo(() => props.options.map((v) => v.trim().toLowerCase()).sort(), [props.options])
-
   //optional id for list of options, used for ARIA
   const listId = id || null;
 
@@ -109,15 +119,6 @@ const Dropdown = (props) => {
     }
   }, [selectedOption]);
 
-  useEffect(() => {
-    if (value) {
-      const existingIdx = options.findIndex(option => option === value.trim().toLowerCase())
-      if (existingIdx !== -1) {
-        setSelectedOption(existingIdx);
-      }
-    }
-  }, [value]);
-
   let btnClasses = styles.btn;
 
   //fade in placeholder if we clear the input
@@ -134,9 +135,9 @@ const Dropdown = (props) => {
 
   const ARIALabelText =
     label && selectedOption !== null
-      ? `${label}. selected option is ${options[selectedOption]}. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option`
+      ? `${label}. selected option is ${options[selectedOption]}. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu`
       : label
-      ? `${label}. no option selected. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option`
+      ? `${label}. no option selected. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu`
       : null;  
 
   const optionsList = (
@@ -162,7 +163,6 @@ const Dropdown = (props) => {
     </ul>
   );
   
-
   return (
     <div className={styles.dropdown} ref={dropDownRef}> 
       <button
@@ -200,5 +200,16 @@ const Dropdown = (props) => {
     </div>
   );
 };
+
+Dropdown.propTypes = {
+  value: PropTypes.string,
+  placeholder: PropTypes.string,
+  onChange: PropTypes.func.isRequired,
+  id: PropTypes.string,
+  autoFocus: PropTypes.bool,
+  label: PropTypes.string,
+  clearable: PropTypes.bool,
+  options: PropTypes.arrayOf(PropTypes.string).isRequired
+}
 
 export default Dropdown;

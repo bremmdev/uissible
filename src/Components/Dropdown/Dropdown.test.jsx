@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { screen, render, userEvent } from "../../../test-utils.js";
 import Dropdown from "./Dropdown";
+import React from "react"
 
 describe("Dropdown", () => {
 
@@ -26,7 +27,7 @@ describe("Dropdown", () => {
     });
 
     it("should render default placeholder if there is no placeholder prop and no option selected", () => {
-      render(<Dropdown placeholder="" options={["apple", "banana", "kiwi"]} value=""/>);
+      render(<Dropdown options={["apple", "banana", "kiwi"]} value=""/>);
       expect(screen.getByRole("button", { name: /please choose an option/i })).toBeInTheDocument();
     })
 
@@ -215,7 +216,7 @@ describe("Dropdown", () => {
       render(<Dropdown options={["apple", "banana", "kiwi"]} autoFocus onChange={onChange}/>) 
       await user.keyboard('[ArrowUp]')
       const optionElements = screen.getAllByRole('option')
-      expect(optionElements[2]).toHaveFocus()
+      expect(optionElements[optionElements.length-1]).toHaveFocus()
     })
 
     it('should select last option on ArrowUp', async () => {

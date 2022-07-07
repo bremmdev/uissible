@@ -1,8 +1,10 @@
+import React from "react"
+
 import Dropdown from "./Components/Dropdown/Dropdown.jsx"
 
 function App() {
   
-  const options = ["StraWberry", "banana", "Kiwi", "meLOn ", "APPLE"]
+  const options = ["strawberry", "banana", "kiwi", "melon", "apple"]
 
   const onChangeHandler = (val) => {
     console.log(val)
@@ -10,7 +12,7 @@ function App() {
 
   return (
     <div className="container">
-      <Dropdown options={options} label="favorite fruit dropdown" autoFocus  onChange={onChangeHandler} clearable/>
+      <Dropdown options={options} label="favorite fruit dropdown" autoFocus onChange={onChangeHandler}  clearable/>
     </div>
   )
 }
