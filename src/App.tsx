@@ -1,6 +1,6 @@
 import React from "react"
 
-import Dropdown from "./Components/Dropdown/Dropdown.jsx"
+import Dropdown from "./Components/Dropdown/Dropdown"
 
 function App() {
   
@@ -12,7 +12,7 @@ function App() {
 
   return (
     <div className="container">
-      <Dropdown options={options} label="favorite fruit dropdown" autoFocus onChange={onChangeHandler}  clearable/>
+      <Dropdown options={options} label="favorite fruit dropdown" value="apple" autoFocus onChange={onChangeHandler}  clearable/>
     </div>
   )
 }

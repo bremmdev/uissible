@@ -1,16 +1,26 @@
 import { useState, useEffect, useRef } from "react";
 import React from "react"
-import styles from "./Dropdown.module.css";
+import styles from "./Dropdown.module.css"
 import {
   IoIosArrowDropdown,
   IoIosArrowDropup,
   IoMdClose,
 } from "react-icons/io";
-import PropTypes from 'prop-types'
 
-const formatText = (x) => `${x.charAt(0).toUpperCase()}${x.slice(1)}`
+const formatText = (x:string) => `${x.charAt(0).toUpperCase()}${x.slice(1)}`
 
-const Dropdown = (props) => {
+type Props = {
+  value?: string,
+  placeholder?: string,
+  onChange: (val:string) => void,
+  id?: string,
+  autoFocus?: boolean,
+  label?: string,
+  clearable?: boolean,
+  options: string[]
+}
+
+const Dropdown = (props: Props) => {
 
   const { value, placeholder, onChange, id, autoFocus, label, clearable } = props;
  
@@ -18,7 +28,7 @@ const Dropdown = (props) => {
   const options = props.options.map((v) => v.trim().toLowerCase()).sort()
 
   //state
-  const [showOptions, setShowOptions] = useState(null)
+  const [showOptions, setShowOptions] = useState(false)
   const [selectedOption, setSelectedOption] = useState(() => {
     if(!value){
       return null
@@ -27,11 +37,11 @@ const Dropdown = (props) => {
     return existingIdx !== -1 ? existingIdx : null;
   });
 
-  const prevSelectedOptionRef = useRef(null);
-  const dropDownRef = useRef(null)
+  const prevSelectedOptionRef = useRef<number | null>(null);
+  const dropDownRef = useRef<HTMLDivElement>(null)
  
   //optional id for list of options, used for ARIA
-  const listId = id || null;
+  const listId = id;
 
   const toggleOptions = () => {
     setShowOptions((prevState) => !prevState);
@@ -43,7 +53,7 @@ const Dropdown = (props) => {
     setShowOptions(false);
   };
 
-  const changeSelectedOption = (index, shouldCollapse = true) => {
+  const changeSelectedOption = (index:number, shouldCollapse = true) => {
     setSelectedOption(index);
 
     if(shouldCollapse){
@@ -58,10 +68,11 @@ const Dropdown = (props) => {
   };
   
   //expand dropdown and select first option
-  const handleButtonKeyDown = (e) => {
+  const handleButtonKeyDown = (e: React.KeyboardEvent) => {
     if(e.code === 'ArrowDown'){
       e.preventDefault()
-      changeSelectedOption(0, false)
+      const newSelectOption = selectedOption !== null ? selectedOption + 1 : 0
+      changeSelectedOption(newSelectOption, false)
     }
 
     if(e.code === 'ArrowUp'){
@@ -70,14 +81,14 @@ const Dropdown = (props) => {
     }
   }
 
-  const handleClearBtnKeyDown = (e) => {
+  const handleClearBtnKeyDown = (e: React.KeyboardEvent) => {
     if(e.code === 'Enter' || e.code === 'Space'){
       e.preventDefault()
       clearSelection(e)
     }
   }
 
-  const handleOptionKeyDown = (e, idx) => {
+  const handleOptionKeyDown = (e: React.KeyboardEvent, idx:number) => {
     if(e.code === 'Escape'){
       e.preventDefault()
       setShowOptions(false)
@@ -91,14 +102,14 @@ const Dropdown = (props) => {
 
     if(e.code === 'ArrowDown'){
       e.preventDefault()
-      const newSelectedOption = selectedOption + 1 > options.length - 1 ? 0 : selectedOption + 1
+      const newSelectedOption = (selectedOption === null || selectedOption + 1 > options.length - 1) ? 0 : selectedOption + 1
       changeSelectedOption(newSelectedOption, false)
       return 
     }
 
     if(e.code === 'ArrowUp'){
       e.preventDefault()
-      const newSelectedOption = selectedOption - 1 < 0 ? options.length - 1 : selectedOption + -1
+      const newSelectedOption = selectedOption! - 1 < 0 ? options.length - 1 : selectedOption! -1
       changeSelectedOption(newSelectedOption, false) 
       return
     }
@@ -113,7 +124,7 @@ const Dropdown = (props) => {
   //focus management for options
   useEffect(() => {
     if(selectedOption !== null){
-      const listElements = [...dropDownRef.current.querySelectorAll('li')]
+      const listElements = [...dropDownRef.current!.querySelectorAll('li')]
       if(listElements && listElements.length > 0)
       listElements[selectedOption].focus()
     }
@@ -135,17 +146,17 @@ const Dropdown = (props) => {
 
   const ARIALabelText =
     label && selectedOption !== null
-      ? `${label}. selected option is ${options[selectedOption]}. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu`
+      ? `${label}. ${options[selectedOption]} selected.`
       : label
-      ? `${label}. no option selected. Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu`
-      : null;  
+      ? `${label}. Please choose an option`
+      : ""
 
   const optionsList = (
     <ul
       role="listbox"
       id={listId}
       tabIndex={-1}
-      aria-activedescendant={options[selectedOption]}
+      aria-activedescendant={selectedOption ? options[selectedOption] : undefined}
     >
       {showOptions &&
         options.map((option, idx) => (
@@ -170,6 +181,7 @@ const Dropdown = (props) => {
         type="button"
         autoFocus={autoFocus}
         aria-expanded={showOptions}
+        aria-describedby="dropdown-instructions"
         aria-haspopup="listbox"
         aria-controls={listId}
         aria-label={ARIALabelText} 
@@ -196,20 +208,12 @@ const Dropdown = (props) => {
           )}
         </div>
       </button>
+      <span id="dropdown-instructions" hidden>Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu</span>
       {optionsList}
     </div>
   );
 };
 
-Dropdown.propTypes = {
-  value: PropTypes.string,
-  placeholder: PropTypes.string,
-  onChange: PropTypes.func.isRequired,
-  id: PropTypes.string,
-  autoFocus: PropTypes.bool,
-  label: PropTypes.string,
-  clearable: PropTypes.bool,
-  options: PropTypes.arrayOf(PropTypes.string).isRequired
-}
+
 
 export default Dropdown;
