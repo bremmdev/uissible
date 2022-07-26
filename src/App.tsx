@@ -13,9 +13,10 @@ function App() {
 
   return (
     <div className="container">
-      {/* <Dropdown options={options} label="favorite fruit dropdown" value="apple" autoFocus onChange={onChangeHandler}  clearable/> */}
       <br/>
-      <Select options={options}  label="Favorite fruit" value="kiwi" clearable onChange={onChangeHandler}/>
+      <Select options={options} value="melon" label="favorite fruit" placeholder="favorite fruit"  clearable onChange={onChangeHandler}/>
+      {/* <Dropdown options={options} label="favorite fruit dropdown" value="apple" autoFocus onChange={onChangeHandler}  clearable/> */}
+
     </div>
   )
 }

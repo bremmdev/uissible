@@ -68,6 +68,11 @@ describe("Select", () => {
         render(<Select onChange={onChange} value="nofruit" options={testOptions}/>)
         expect(screen.getByRole('combobox').textContent).not.toBe("Nofruit")
       })
+
+      it('should not have focus when it is disabled', () => {
+        render(<Select onChange={onChange} value="nofruit" options={testOptions} disabled autoFocus/>)
+        expect(screen.getByRole('combobox')).not.toHaveFocus()
+      })
     })
 
     describe('clear button', () => {
@@ -164,60 +169,59 @@ describe("Select", () => {
 
     });
 
-
    describe("Keyboard accessibility - collapsed state", () => {
-      it('shows options on SPACE', async () => {
+
+      const setupTest = () => {
         const user = userEvent.setup()
         render(<Select onChange={onChange} value="banana" options={testOptions}/>)
+        return { user }
+      }
+
+      const focusComboBox = () => {
         const comboBox = screen.getByRole('combobox')
         comboBox.focus()
+      }
+
+      it('shows options on SPACE', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Space]')
         expect(screen.queryAllByRole('option').length).toBeGreaterThan(0)
       })
 
       it('shows options on ENTER', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter]')
         expect(screen.queryAllByRole('option').length).toBeGreaterThan(0)
       })
 
       it('shows options on ArrowDown', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[ArrowDown]')
         expect(screen.queryAllByRole('option').length).toBeGreaterThan(0)
       }) 
 
       it('shows options on ArrowUp', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[ArrowUp]')
         expect(screen.queryAllByRole('option').length).toBeGreaterThan(0)
       }) 
 
-      it('shows options and focuses on first option on HOME keydown', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('shows options and moves visual focus to first option on HOME keydown', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Home]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements.length).toBeGreaterThan(0)
         expect(optionElements[0].classList).toMatch(/current-option/)
       })
 
-      it('shows options and focuses on last option on END keydown', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('shows options and moves visual focus to last option on END keydown', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[End]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements.length).toBeGreaterThan(0)
@@ -226,11 +230,21 @@ describe("Select", () => {
 
     describe("Keyboard accessibility - expanded state", () => {
 
-      it('hides options and keeps focus on combobox on ESCAPE', async () => {
+      const setupTest = () => {
         const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
+        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
+        return { user }
+      }
+
+      const focusComboBox = () => {
         const comboBox = screen.getByRole('combobox')
         comboBox.focus()
+        return { comboBox }
+      }
+
+      it('hides options and keeps focus on combobox on ESCAPE', async () => {
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][Escape]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements).toHaveLength(0)
@@ -238,151 +252,136 @@ describe("Select", () => {
       })  
 
       it('selects option on ENTER', async() => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][ArrowDown][Enter]')
-        expect(comboBox.textContent).toBe("Banana")
+        expect(comboBox.textContent).toBe("Kiwi")
       })
 
       it('selects option on SPACE', async() => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][ArrowDown][Space]')
-        expect(comboBox.textContent).toBe("Banana")
+        expect(comboBox.textContent).toBe("Kiwi")
       })
 
       it('selects option on TAB', async() => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][ArrowDown][Tab]')
-        expect(comboBox.textContent).toBe("Banana")
+        expect(comboBox.textContent).toBe("Kiwi")
       })
 
       it('keeps focus on combobox on ENTER', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][Enter]')
         expect(comboBox).toHaveFocus()
       })
 
       it('keeps focus on combobox on SPACE', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][Space]')
         expect(comboBox).toHaveFocus()
       })
 
       it('keeps focus on combobox on TAB', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        const { comboBox} = focusComboBox()
         await user.keyboard('[Enter][Tab]')
         expect(comboBox).toHaveFocus()
       })
 
       it('hides options on ENTER', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][Enter]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements).toHaveLength(0)
       })
 
       it('hides options on SPACE', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][Space]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements).toHaveLength(0)
       })
       
       it('hides options on TAB', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][Tab]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements).toHaveLength(0)
       })
       
-      it('moves focus to next option on ArrowDown', async () => {
-        //move focus from item 0 to item 1
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="apple" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('moves visual focus to next option on ArrowDown', async () => {
+        //move focus from item 1 to item 2
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][ArrowDown]')
         const optionElements = screen.queryAllByRole('option')
-        expect(optionElements[1].classList).toMatch(/current-option/)
+        expect(optionElements[2].classList).toMatch(/current-option/)
       })
 
-      it('moves focus to first option after end of list on ArrowDown', async () => {
-         const user = userEvent.setup()
-         render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-         const comboBox = screen.getByRole('combobox')
-         comboBox.focus()
-         await user.keyboard('[Enter][ArrowDown][ArrowDown]')
-         const optionElements = screen.queryAllByRole('option')
-         expect(optionElements[0].classList).toMatch(/current-option/)
+      it('moves visual focus to first option after end of list on ArrowDown', async () => {
+        const { user } = setupTest()
+        focusComboBox()
+        await user.keyboard('[Enter][ArrowDown][ArrowDown]')
+        const optionElements = screen.queryAllByRole('option')
+        expect(optionElements[0].classList).toMatch(/current-option/)
       })
 
-      it('moves focus to previous option on ArrowUp', async () => {
+      it('moves visual focus to previous option on ArrowUp', async () => {
         //move focus from item 1 to item 0
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][ArrowUp]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements[0].classList).toMatch(/current-option/)
       })
 
-      it('moves focus to last option after beginning of list on ArrowUp', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('moves visual focus to last option after beginning of list on ArrowUp', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][ArrowUp][ArrowUp]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements[testOptions.length-1].classList).toMatch(/current-option/)
      })
 
-      it('moves focus to first option on HOME', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('moves visual focus to first option on HOME', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][Home]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements[0].classList).toMatch(/current-option/)
       })
 
-      it('moves focus to first option on END', async () => {
-        const user = userEvent.setup()
-        render(<Select onChange={onChange} value="banana" options={testOptions}/>)
-        const comboBox = screen.getByRole('combobox')
-        comboBox.focus()
+      it('moves visual focus to first option on END', async () => {
+        const { user } = setupTest()
+        focusComboBox()
         await user.keyboard('[Enter][End]')
         const optionElements = screen.queryAllByRole('option')
         expect(optionElements[testOptions.length-1].classList).toMatch(/current-option/)
       })
-    })
-    
+
+       it('moves visual focus to the correct option on a character press', async () => {
+        const { user } = setupTest()
+        focusComboBox()
+        await user.keyboard('k')
+        const optionElements = screen.queryAllByRole('option')
+        expect(optionElements[testOptions.length-1].classList).toMatch(/current-option/)
+       })
+
+       it('moves visual focus to the correct option on a character (capital) press', async () => {
+        const { user } = setupTest()
+        focusComboBox()
+        await user.keyboard('K')
+        const optionElements = screen.queryAllByRole('option')
+        expect(optionElements[testOptions.length-1].classList).toMatch(/current-option/)
+       })
+    })  
   })
 })

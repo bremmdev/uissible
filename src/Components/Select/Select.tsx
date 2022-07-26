@@ -2,14 +2,15 @@ import React, { useState, useRef, useEffect } from "react";
 import {
   IoIosArrowDropdown,
   IoIosArrowDropup,
-  IoMdClose,
   IoMdCheckmark
 } from "react-icons/io";
+import { MdClear } from "react-icons/md"
 import styles from "./Select.module.css";
 
 type Props = {
   autoFocus?: boolean;
   clearable?: boolean;
+  disabled?: boolean;
   id?: string;
   label?: string;
   onChange: (val: string) => void;
@@ -29,7 +30,7 @@ const determineSelectedOption = (value: string | undefined, options: string[]) =
 } 
 
 const Select = (props: Props) => {
-  const { autoFocus, clearable, id, label, onChange, placeholder, value } = props;
+  const { autoFocus, clearable, disabled, id, label, onChange, placeholder, value } = props;
 
   //format and sort options
   const options = props.options.map((v) => v.trim().toLowerCase()).sort();
@@ -39,7 +40,6 @@ const Select = (props: Props) => {
   const [focusedOption, setFocusedOption] = useState<number | null>(null)
 
   const selectInputRef = useRef<HTMLDivElement>(null);
-  const listOptionsRef = useRef<HTMLDivElement>(null)
   const prevSelectedOptionRef = useRef<number | null>(null);
 
   //optional id for list of options, used for ARIA
@@ -55,29 +55,38 @@ const Select = (props: Props) => {
     setShowOptions(false);
   };
 
-  const changeSelectedOption = (index:number, shouldCollapse = true) => {
+  const changeSelectedOption = (index:number) => {
     setSelectedOption(index);
-
-    if(shouldCollapse){
-      setShowOptions(false);
-    }
-    else{
-      setShowOptions(true)
-    }
-    
+    setShowOptions(false);
+  
     //expose value on onChange prop
     onChange(options[index]);
   };
 
   const handleSelectKeyDown = (e: React.KeyboardEvent) => {
-    //do not prevent tabbing through elements
+    //do not prevent tabbing through elements of the page
     if(!(e.key == 'Tab' && !showOptions)){
       e.preventDefault()
     }
+
+    if(disabled) {
+      return
+    }
+
     const openKeys = ['Space', 'Enter', ' ', 'ArrowDown', 'ArrowUp', 'Home', 'End']
     const selectKeys = ['Space', 'Enter', ' ', 'Tab']
-    console.log(e.key)
+    const letterRegex = /^\w$/i
 
+    //detect character press
+    if(e.key.match(letterRegex)){
+      const newIdx = options.findIndex(v => v.startsWith(e.key.toLowerCase()))
+      if(newIdx !== -1){
+        setShowOptions(true)
+        setFocusedOption(newIdx)
+      }
+      return
+    }
+  
     //collapsed state
     if (!showOptions) {
       if (openKeys.includes(e.key)) {
@@ -107,8 +116,6 @@ const Select = (props: Props) => {
       }
 
       if (e.code === "ArrowDown") {
-        console.log(focusedOption, selectedOption);
-
         const newIdx = hasFocusedOption
           ? focusedOption + 1 > max
             ? 0
@@ -144,13 +151,10 @@ const Select = (props: Props) => {
         return;
       }
     }
-
-     
-     //@TODO printable characters
   }
 
   useEffect(() => {
-    if (autoFocus) {
+    if (autoFocus && !disabled) {
       selectInputRef.current?.focus();
     }
   }, []);
@@ -161,12 +165,16 @@ const Select = (props: Props) => {
     prevSelectedOptionRef.current = selectedOption;
   }, [selectedOption]);
 
+
+  //dynamic classes
   let selectControlClasses = styles.select__control;
 
   //fade in placeholder if we clear the input
   if (selectedOption === null && prevSelectedOptionRef.current !== null) {
     selectControlClasses = `${styles.select__control} ${styles.fade}`;
   }
+
+  const selectValueClasses = selectedOption === null ? `${styles.select__value} ${styles.placeholder}` : styles.select__value
 
   //text for select control
   const selectText =
@@ -176,18 +184,16 @@ const Select = (props: Props) => {
       ? placeholder
       : "Please choose an option";
 
-  const doRenderClearButton: boolean = selectedOption !== null && clearable ? true : false;
+  const doRenderClearButton: boolean = selectedOption !== null && clearable && !disabled ? true : false;
 
   //menu container and list of options
   const listOptions = showOptions && (
     <div
       className={styles.select__menu}
-      ref={listOptionsRef}
       role="listbox"
       aria-labelledby="select__label"   
       tabIndex={-1}
       id={listId}
-     
     >
       {options.map((option, idx) => (
         <div
@@ -210,6 +216,7 @@ const Select = (props: Props) => {
      {label && <label id="select__label" hidden>{`${label}.`}</label>}
      <div id="select__instructions" hidden>Use the arrow keys to go through the options. Press Tab Space or Enter to select an option and close the menu</div>
       <div
+        data-disabled={disabled} 
         className={selectControlClasses}
         onClick={toggleOptions}
         onKeyDown={handleSelectKeyDown}
@@ -220,13 +227,13 @@ const Select = (props: Props) => {
         aria-describedby="select__instructions"
         aria-activedescendant={`option_${focusedOption}`}
         aria-controls={listId}
-        tabIndex={0}
+        tabIndex={disabled ? -1 : 0}
         ref={selectInputRef}
       >
-        <div id="select__value" className={styles.select__value}>{formatText(selectText)}</div>
+        <div id="select__value" className={selectValueClasses}>{formatText(selectText)}</div>
         <div className={styles.select__actions}>
           {doRenderClearButton && (
-            <IoMdClose
+            <MdClear
               className={styles.select__clear}
               role="button"
               size="1.5rem"
