@@ -49,7 +49,7 @@ const Select = (props: Props) => {
     setShowOptions((prevState) => !prevState);
   };
 
-  const clearSelection = (e: React.MouseEvent) => {
+  const clearSelection = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.stopPropagation(); //prevents opening the dropdown again
     setSelectedOption(null);
     setShowOptions(false);
@@ -58,13 +58,13 @@ const Select = (props: Props) => {
   const changeSelectedOption = (index:number) => {
     setSelectedOption(index);
     setShowOptions(false);
-  
+    selectInputRef.current?.focus()
     //expose value on onChange prop
     onChange(options[index]);
   };
 
   const handleSelectKeyDown = (e: React.KeyboardEvent) => {
-    //do not prevent tabbing through elements of the page
+    //*do not prevent tabbing through elements of the page
     if(!(e.key == 'Tab' && !showOptions)){
       e.preventDefault()
     }
@@ -105,17 +105,17 @@ const Select = (props: Props) => {
       const hasSelectedOption = selectedOption !== null;
       const max = options.length - 1;
 
-      if (e.code === "Escape") {
+      if (e.key === "Escape") {
         setShowOptions(false);
         return;
       }
 
-      if (selectKeys.includes(e.code)) {
+      if (selectKeys.includes(e.key)) {
         changeSelectedOption(focusedOption!);
         return;
       }
 
-      if (e.code === "ArrowDown") {
+      if (e.key === "ArrowDown") {
         const newIdx = hasFocusedOption
           ? focusedOption + 1 > max
             ? 0
@@ -130,7 +130,7 @@ const Select = (props: Props) => {
         return;
       }
 
-      if (e.code === "ArrowUp") {
+      if (e.key === "ArrowUp") {
         const newIdx = hasFocusedOption
           ? focusedOption - 1 < 0
             ? max
@@ -145,11 +145,23 @@ const Select = (props: Props) => {
         return;
       }
 
-      if (e.code === "Home" || e.code === "End") {
+      if (e.key === "Home" || e.key === "End") {
         const newIdx = e.key === "Home" ? 0 : max;
         setFocusedOption(newIdx);
         return;
       }
+    }
+  }
+
+  const handleClearBtnKeyDown = (e: React.KeyboardEvent) => {
+    if(e.key === 'Tab'){
+      return
+    }
+    
+    e.preventDefault()
+    const deleteKeys = ['Enter', 'Space', ' ']
+    if(deleteKeys.includes(e.key)){
+      clearSelection(e)
     }
   }
 
@@ -172,6 +184,8 @@ const Select = (props: Props) => {
   //fade in placeholder if we clear the input
   if (selectedOption === null && prevSelectedOptionRef.current !== null) {
     selectControlClasses = `${styles.select__control} ${styles.fade}`;
+    //focus select after clearing input
+    selectInputRef.current?.focus()
   }
 
   const selectValueClasses = selectedOption === null ? `${styles.select__value} ${styles.placeholder}` : styles.select__value
@@ -225,7 +239,7 @@ const Select = (props: Props) => {
         aria-expanded={showOptions}
         aria-labelledby="select__label"
         aria-describedby="select__instructions"
-        aria-activedescendant={`option_${focusedOption}`}
+        aria-activedescendant={focusedOption !== null ? `option_${focusedOption}` : undefined}
         aria-controls={listId}
         tabIndex={disabled ? -1 : 0}
         ref={selectInputRef}
@@ -240,6 +254,7 @@ const Select = (props: Props) => {
               onClick={clearSelection}
               tabIndex={0}
               aria-label="clear input"
+              onKeyDown={handleClearBtnKeyDown}
             />
           )}
           {showOptions ? (

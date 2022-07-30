@@ -169,6 +169,33 @@ describe("Select", () => {
 
     });
 
+    describe("Keyboard accessibility - clear button", () => {
+      
+      it('should clear the value on SPACE', async () => {
+        const user = userEvent.setup()
+        render(<Select onChange={onChange} clearable value="banana" options={testOptions}/>)
+        screen.getByRole('button', { name: /clear input/i}).focus()
+        await user.keyboard('[Space]')
+        expect(screen.getByRole('combobox').textContent).toBe("Please choose an option")
+      })
+
+      it('should clear the value on ENTER', async () => {
+        const user = userEvent.setup()
+        render(<Select onChange={onChange} clearable value="banana" options={testOptions}/>)
+        screen.getByRole('button', { name: /clear input/i}).focus()
+        await user.keyboard('[Enter]')
+        expect(screen.getByRole('combobox').textContent).toBe("Please choose an option")
+      })
+
+      it('should not show the options on keypress', async () => {
+        const user = userEvent.setup()
+        render(<Select onChange={onChange} clearable value="banana" options={testOptions}/>)
+        screen.getByRole('button', { name: /clear input/i}).focus()
+        await user.keyboard('[Enter]')
+        expect(screen.queryAllByRole('option')).toHaveLength(0)
+      })
+    })  
+
    describe("Keyboard accessibility - collapsed state", () => {
 
       const setupTest = () => {

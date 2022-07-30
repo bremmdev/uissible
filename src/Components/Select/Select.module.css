@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Source+Code+Pro:ital,wght@0,400;0,500;0,600;1,600&display=swap');
 
+
 .select__container{
   font-size:1rem;
   font-family: 'Poppins', sans-serif;
@@ -75,7 +76,6 @@
   background:#cecdfd;
 }
 
-
 .select__actions{
   display:flex;
   align-items:center;
@@ -91,6 +91,10 @@
 .select__clear:hover{
   transform:scale(1.1);
   opacity:1;
+}
+
+.select__clear:focus{
+  outline:2px solid #152EFF;
 }
 
 .disabled {
